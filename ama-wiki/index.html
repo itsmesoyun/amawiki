@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AMA-Wiki</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+        "Pretendard", "Noto Sans KR", Arial, sans-serif;
+      background: #0b0b0d;
+      color: white;
+    }
+
+    header {
+      padding: 56px 20px 40px;
+      text-align: center;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      background: linear-gradient(to bottom, #101114, #0b0b0d);
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 52px;
+      font-weight: 800;
+      letter-spacing: -1px;
+    }
+
+    header p {
+      margin-top: 14px;
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 18px;
+    }
+
+    .top-controls {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 28px 20px 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      align-items: center;
+    }
+
+    .search-box {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 14px 18px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: #16171b;
+      color: white;
+      font-size: 15px;
+      outline: none;
+    }
+
+    .search-box input::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    .filters {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .filter-btn {
+      padding: 9px 16px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: #131417;
+      color: white;
+      cursor: pointer;
+      font-size: 13px;
+      transition: 0.2s ease;
+    }
+
+    .filter-btn:hover {
+      background: #1d1f24;
+    }
+
+    .filter-btn.active {
+      background: #ffffff;
+      color: #111;
+      border-color: #ffffff;
+      font-weight: 700;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+      padding: 24px 20px 60px;
+    }
+
+    .card {
+      background: linear-gradient(180deg, #191a1f 0%, #141519 100%);
+      border: 1px solid rgba(255, 255, 255, 0.09);
+      border-radius: 22px;
+      padding: 22px 20px;
+      cursor: pointer;
+      transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+      min-height: 190px;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(255, 255, 255, 0.22);
+      box-shadow: 0 14px 30px rgba(0, 0, 0, 0.25);
+    }
+
+    .card-top {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .card-photo {
+      width: 68px;
+      height: 68px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      background: #222;
+      flex-shrink: 0;
+    }
+
+    .card-name {
+      font-size: 26px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin: 0;
+    }
+
+    .card-main {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      color: rgba(255, 255, 255, 0.78);
+      font-size: 15px;
+      line-height: 1.5;
+    }
+
+    .empty-message {
+      text-align: center;
+      color: rgba(255, 255, 255, 0.5);
+      padding: 40px 20px 80px;
+      display: none;
+    }
+
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.62);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      z-index: 999;
+    }
+
+    .modal-overlay.show {
+      display: flex;
+    }
+
+    .modal {
+      width: 100%;
+      max-width: 680px;
+      background: #15161a;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 28px;
+      overflow: hidden;
+      box-shadow: 0 20px 70px rgba(0, 0, 0, 0.45);
+    }
+
+    .modal-top {
+      padding: 28px 28px 22px;
+      background: linear-gradient(135deg, #1d2027, #111216);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      position: relative;
+    }
+
+    .modal-close {
+      position: absolute;
+      right: 18px;
+      top: 16px;
+      border: none;
+      background: rgba(255, 255, 255, 0.08);
+      color: white;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .modal-profile {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding-right: 44px;
+    }
+
+    .modal-photo {
+      width: 92px;
+      height: 92px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      background: #222;
+      flex-shrink: 0;
+    }
+
+    .modal-top h2 {
+      margin: 0 0 8px 0;
+      font-size: 34px;
+      font-weight: 800;
+      letter-spacing: -0.8px;
+    }
+
+    .modal-sub {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 15px;
+    }
+
+    .modal-body {
+      padding: 24px 28px 30px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px 22px;
+    }
+
+    .info-item {
+      background: #101115;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 16px;
+      padding: 14px 16px;
+    }
+
+    .info-label {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.46);
+      margin-bottom: 7px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .info-value {
+      font-size: 15px;
+      color: white;
+      line-height: 1.5;
+      word-break: keep-all;
+    }
+
+    @media (max-width: 700px) {
+      header h1 {
+        font-size: 40px;
+      }
+
+      .card-name {
+        font-size: 22px;
+      }
+
+      .modal-body {
+        grid-template-columns: 1fr;
+      }
+
+      .modal-top h2 {
+        font-size: 28px;
+      }
+
+      .modal-profile {
+        align-items: flex-start;
+      }
+
+      .modal-photo {
+        width: 78px;
+        height: 78px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>⚽ AMA-Wiki</h1>
+    <p>아마축구부 멤버 아카이브</p>
+  </header>
+
+  <section class="top-controls">
+    <div class="search-box">
+      <input
+        type="text"
+        id="searchInput"
+        placeholder="이름, 포지션, 기수 검색"
+      />
+    </div>
+
+    <div class="filters">
+      <button class="filter-btn active" data-filter="all">ALL</button>
+      <button class="filter-btn" data-filter="45">45기</button>
+      <button class="filter-btn" data-filter="46">46기</button>
+      <button class="filter-btn" data-filter="47">47기</button>
+    </div>
+  </section>
+
+  <main>
+    <div class="container" id="cardContainer"></div>
+    <div class="empty-message" id="emptyMessage">검색 결과가 없습니다.</div>
+  </main>
+
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="modal">
+      <div class="modal-top">
+        <button class="modal-close" id="modalClose">✕</button>
+
+        <div class="modal-profile">
+          <img id="modalPhoto" class="modal-photo" src="" alt="선수 사진" />
+          <div>
+            <h2 id="modalName">이름</h2>
+            <div class="modal-sub" id="modalSub">기수 · 포지션 · 번호</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  <script>
+    const players = [
+      {
+        name: "김민서",
+        season: "45",
+        position: "GK",
+        number: "23",
+        photo: "https://via.placeholder.com/300x300.png?text=PROFILE",
+        mbti: "INFP",
+        major: "도시사회학과 19학번",
+        advantage: "반응속도",
+        weakness: "신분증 집에 놓고 올 수 있음",
+        favoriteFood: "서울치즈피자",
+        hometown: "청라중 · 해원고",
+        idealType: "축구 좋아하는 사람",
+        status: "도공 졸작중입니다. 전시하면 놀러와주세요.",
+        roleModel: "휘석이형, 지훈이형",
+        tmi: "생긴 것보다 존나 찜"
+      },
+      {
+        name: "이준호",
+        season: "46",
+        position: "MF",
+        number: "7",
+        photo: "https://via.placeholder.com/300x300.png?text=PROFILE",
+        mbti: "ENFP",
+        major: "경영학과",
+        advantage: "활동량",
+        weakness: "아침잠",
+        favoriteFood: "떡볶이",
+        hometown: "서울",
+        idealType: "같이 축구 보는 사람",
+        status: "요즘 풋살에 빠져 있음",
+        roleModel: "데브라이너",
+        tmi: "카페 가면 디저트 꼭 시킴"
+      },
+      {
+        name: "박지훈",
+        season: "46",
+        position: "DF",
+        number: "4",
+        photo: "https://via.placeholder.com/300x300.png?text=PROFILE",
+        mbti: "ISTP",
+        major: "컴퓨터공학과",
+        advantage: "태클",
+        weakness: "낯가림",
+        favoriteFood: "치킨",
+        hometown: "인천",
+        idealType: "편한 사람",
+        status: "요즘 운동 루틴 만드는 중",
+        roleModel: "반다이크",
+        tmi: "축구화 정리 엄청 깔끔하게 함"
+      }
+    ];
+
+    let currentFilter = "all";
+
+    const cardContainer = document.getElementById("cardContainer");
+    const searchInput = document.getElementById("searchInput");
+    const emptyMessage = document.getElementById("emptyMessage");
+
+    const modalOverlay = document.getElementById("modalOverlay");
+    const modalClose = document.getElementById("modalClose");
+    const modalName = document.getElementById("modalName");
+    const modalSub = document.getElementById("modalSub");
+    const modalPhoto = document.getElementById("modalPhoto");
+    const modalBody = document.getElementById("modalBody");
+
+    function renderCards() {
+      const keyword = searchInput.value.trim().toLowerCase();
+
+      const filteredPlayers = players.filter((player) => {
+        const matchSeason =
+          currentFilter === "all" || player.season === currentFilter;
+
+        const searchTarget =
+          `${player.name} ${player.position} ${player.season}기 ${player.number} ${player.major}`.toLowerCase();
+
+        const matchKeyword = searchTarget.includes(keyword);
+
+        return matchSeason && matchKeyword;
+      });
+
+      cardContainer.innerHTML = "";
+
+      if (filteredPlayers.length === 0) {
+        emptyMessage.style.display = "block";
+      } else {
+        emptyMessage.style.display = "none";
+      }
+
+      filteredPlayers.forEach((player) => {
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `
+          <div class="card-top">
+            <img class="card-photo" src="${player.photo}" alt="${player.name}">
+            <h3 class="card-name">${player.name}</h3>
+          </div>
+          <div class="card-main">
+            <div>${player.season}기</div>
+            <div>${player.position}</div>
+            <div>#${player.number}</div>
+          </div>
+        `;
+
+        card.addEventListener("click", () => openModal(player));
+        cardContainer.appendChild(card);
+      });
+    }
+
+    function openModal(player) {
+      modalName.textContent = player.name;
+      modalSub.textContent = `${player.season}기 · ${player.position} · #${player.number}`;
+      modalPhoto.src = player.photo;
+      modalPhoto.alt = player.name;
+
+      const details = [
+        ["MBTI", player.mbti],
+        ["학과", player.major],
+        ["출신", player.hometown],
+        ["장점", player.advantage],
+        ["단점", player.weakness],
+        ["최애 음식", player.favoriteFood],
+        ["이상형", player.idealType],
+        ["근황", player.status],
+        ["롤모델", player.roleModel],
+        ["한줄 TMI", player.tmi]
+      ];
+
+      modalBody.innerHTML = details
+        .map(
+          ([label, value]) => `
+            <div class="info-item">
+              <div class="info-label">${label}</div>
+              <div class="info-value">${value}</div>
+            </div>
+          `
+        )
+        .join("");
+
+      modalOverlay.classList.add("show");
+    }
+
+    function closeModal() {
+      modalOverlay.classList.remove("show");
+    }
+
+    document.querySelectorAll(".filter-btn").forEach((button) => {
+      button.addEventListener("click", () => {
+        document
+          .querySelectorAll(".filter-btn")
+          .forEach((btn) => btn.classList.remove("active"));
+
+        button.classList.add("active");
+        currentFilter = button.dataset.filter;
+        renderCards();
+      });
+    });
+
+    searchInput.addEventListener("input", renderCards);
+
+    modalClose.addEventListener("click", closeModal);
+
+    modalOverlay.addEventListener("click", (e) => {
+      if (e.target === modalOverlay) {
+        closeModal();
+      }
+    });
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape") {
+        closeModal();
+      }
+    });
+
+    renderCards();
+  </script>
+</body>
+</html>
